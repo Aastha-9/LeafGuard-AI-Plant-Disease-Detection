@@ -1,0 +1,2 @@
+models/**/variables.data* filter=lfs diff=lfs merge=lfs -text
+models/**/*.pb filter=lfs diff=lfs merge=lfs -text

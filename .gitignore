@@ -2,7 +2,6 @@
 .idea/
 anaconda_projects/
 node_modules/
-models/
 __pycache__/
 *.h5
 *.pth
@@ -12,3 +11,5 @@ Training/
 *.jpg
 *.jpeg
 *.png
+
+/models/1/
