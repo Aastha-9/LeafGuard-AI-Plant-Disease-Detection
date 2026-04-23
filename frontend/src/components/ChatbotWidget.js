@@ -8,9 +8,9 @@ const ChatbotWidget = ({ language }) => {
   
   // Set default welcoming message whenever language changes
   useEffect(() => {
-    let greeting = "Hello! I'm your LeafGuard AI assistant. Ask me anything about crop diseases, remedies, or agriculture in general.";
-    if (language === 'hi') greeting = "नमस्ते! मैं आपका लीफगार्ड एआई सहायक हूं। मुझसे फसल रोगों, उपचार या कृषि के बारे में कुछ भी पूछें।";
-    if (language === 'mr') greeting = "नमस्कार! मी तुमचा लीफगार्ड एआय सहाय्यक आहे. मला पीक रोग, उपाय किंवा शेतीबद्दल काहीही विचारा.";
+    let greeting = "Hello! I'm your Potato Disease AI assistant. Ask me anything about crop diseases, remedies, or agriculture in general.";
+    if (language === 'hi') greeting = "नमस्ते! मैं आपका आलू रोग एआई सहायक हूं। मुझसे फसल रोगों, उपचार या कृषि के बारे में कुछ भी पूछें।";
+    if (language === 'mr') greeting = "नमस्कार! मी तुमचा बटाटा रोग AI सहाय्यक आहे. मला पीक रोग, उपाय किंवा शेतीबद्दल काहीही विचारा.";
     
     // Reset or update first message
     setMessages([{ id: 1, text: greeting, sender: 'bot' }]);
@@ -52,13 +52,13 @@ const ChatbotWidget = ({ language }) => {
     }
   };
 
-  let title = "LeafGuard Assistant";
+  let title = "Potato Assistant";
   let placeholder = "Ask a question...";
   if (language === 'hi') {
-    title = "लीफगार्ड सहायक";
+    title = "आलू सहायक";
     placeholder = "एक सवाल पूछें...";
   } else if (language === 'mr') {
-    title = "लीफगार्ड सहाय्यक";
+    title = "बटाटा सहाय्यक";
     placeholder = "एक प्रश्न विचारा...";
   }
 

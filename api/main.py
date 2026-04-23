@@ -339,7 +339,7 @@ async def predict(
     print(f"\n--- PREDICTION DEBUG ---", flush=True)
     for i, cls in enumerate(class_names):
         print(f"  {cls}: {pred_vals[i]*100:.4f}%", flush=True)
-    print(f"  → Winner: {predicted_class} ({confidence:.4f}%)", flush=True)
+    print(f"  -> Winner: {predicted_class} ({confidence:.4f}%)", flush=True)
     print(f"------------------------\n", flush=True)
 
     return {

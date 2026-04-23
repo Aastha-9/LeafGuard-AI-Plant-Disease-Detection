@@ -1,11 +1,11 @@
-# 🌿 LeafGuard: AI Plant Disease Detection & Assistant
+# 🌿 Smart Detection of Diseases in Potato Leaves Using AI
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-LeafGuard--AI-green?logo=github)](https://github.com/Aastha-9/LeafGuard-AI-Plant-Disease-Detection)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-blue?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://reactjs.org/)
 [![TensorFlow](https://img.shields.io/badge/AI-TensorFlow-FF6F00?logo=tensorflow)](https://www.tensorflow.org/)
 
-**LeafGuard** is a state-of-the-art, multilingual agricultural platform designed to empower farmers with instant disease diagnosis and AI-driven expert advice. Using deep learning and Large Language Models (LLM), it provides a complete toolkit for crop health management.
+**This project** is a state-of-the-art, multilingual agricultural platform designed to empower farmers with instant disease diagnosis and AI-driven expert advice. Using deep learning and Large Language Models (LLM), it provides a complete toolkit for crop health management.
 
 ---
 
@@ -86,4 +86,4 @@ This project uses **Git LFS** to store model weights (housed in `/models`). Ensu
 
 ---
 
-🌿 **LeafGuard AI** — *Empowering Agriculture with Intelligent Diagnosis.*
+🌿 **Potato Disease AI** — *Empowering Agriculture with Intelligent Diagnosis.*
