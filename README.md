@@ -1,6 +1,6 @@
 # 🌿 Smart Detection of Diseases in Potato Leaves Using AI
 
-[![GitHub Repository](https://img.shields.io/badge/GitHub-LeafGuard--AI-green?logo=github)](https://github.com/Aastha-9/LeafGuard-AI-Plant-Disease-Detection)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Potato--Disease--AI-green?logo=github)](https://github.com/Aastha-9/Smart-Detection-of-Diseases-in-Potato-Leaves-Using-AI)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-blue?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://reactjs.org/)
 [![TensorFlow](https://img.shields.io/badge/AI-TensorFlow-FF6F00?logo=tensorflow)](https://www.tensorflow.org/)
@@ -51,8 +51,8 @@
 
 1.  **Clone the Repository**:
     ```bash
-    git clone https://github.com/Aastha-9/LeafGuard-AI-Plant-Disease-Detection.git
-    cd LeafGuard-AI-Plant-Disease-Detection
+    git clone https://github.com/Aastha-9/Smart-Detection-of-Diseases-in-Potato-Leaves-Using-AI.git
+    cd Smart-Detection-of-Diseases-in-Potato-Leaves-Using-AI
     ```
 
 2.  **Environment Variables**:
