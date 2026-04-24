@@ -39,8 +39,9 @@ def get_model(mode="chat"):
     # Priority defaults
     defaults = {
         "chat": ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"],
-        "vision": ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro-vision"]
+        "vision": ["gemini-1.5-flash", "gemini-1.5-flash-latest"] # Removed experimental models to avoid low quotas
     }
+
 
     # 1. Try defaults first
     for model_name in defaults[mode]:
@@ -216,6 +217,7 @@ async def predict(
     file: UploadFile = File(...),
     lang: str = Query("en")   # en | hi | mr
 ):
+    print(f"DEBUG: predict called with lang='{lang}'", flush=True)
     import asyncio
     
     image_bytes = await file.read()
@@ -264,17 +266,79 @@ async def predict(
     # A pure black & white pencil drawing scores ~0-5, real photos score 20-80+
     is_colorless = avg_saturation < 8.0
     
-    if is_colorless:
+    # 1. White/Light Background detection (common in documents)
+    white_mask = np.all(img_np > 200, axis=2) 
+    white_ratio = np.mean(white_mask)
+    
+    # 2. Color Profile check (Potato leaves are primarily green)
+    # Excess Green Index (ExG) = 2*G - R - B
+    r, g, b = img_np[:,:,0].astype(float), img_np[:,:,1].astype(float), img_np[:,:,2].astype(float)
+    exg = 2.0 * g - r - b
+    avg_exg = np.mean(exg)
+    
+    # 3. Texture/Flatness check
+    color_std = np.std(img_np)
+    
+    # Heuristic for "Invalid Image"
+    # Real leaves are green (avg_exg > 10), high-texture (std > 30), and rarely mostly white
+    is_not_green = avg_exg < 10.0 and not is_colorless # If it has color, it should be green
+    is_document = white_ratio > 0.35 or color_std < 30.0
+    
+    print(f"DEBUG: white_ratio={white_ratio:.4f}, avg_exg={avg_exg:.4f}, color_std={color_std:.4f}, is_colorless={is_colorless}", flush=True)
+    
+    if is_colorless or is_document or is_not_green:
+        msg = "The image does not appear to be a plant leaf."
+        if is_colorless:
+            msg = "The image appears to be a black & white drawing or sketch, not a real plant leaf."
+        elif is_document:
+            msg = "The image appears to be a document or diagram, not a real plant leaf."
+        elif is_not_green:
+            msg = "The image colors do not match a typical plant leaf. Please upload a clear photo of a green leaf."
+
+
+
+        msg = "The image appears to be a drawing, document, or non-leaf diagram."
+        if is_colorless:
+            msg = "The image appears to be a black & white drawing or sketch, not a real plant leaf."
+        elif is_document:
+            msg = "The image appears to be a document or diagram with a white background, not a real plant leaf."
+            
+        recoms = [
+            "Ensure the photo is a real photograph of a plant leaf.",
+            "Avoid uploading diagrams, flowcharts, or screenshots of text.",
+            "Ensure the plant is a potato crop."
+        ]
+        
+        if lang == "hi":
+            if is_colorless:
+                msg = "यह छवि एक श्वेत-श्याम रेखाचित्र या स्केच प्रतीत होती है, न कि असली पौधे की पत्ती।"
+            else:
+                msg = "यह छवि एक दस्तावेज़ या सफ़ेद पृष्ठभूमि वाला आरेख प्रतीत होती है, न कि असली पौधे की पत्ती।"
+            recoms = [
+                "सुनिश्चित करें कि फोटो पौधे की पत्ती का वास्तविक छायाचित्र है।",
+                "आरेख, फ्लोचार्ट या टेक्स्ट के स्क्रीनशॉट अपलोड करने से बचें।",
+                "सुनिश्चित करें कि पौधा आलू की फसल है।"
+            ]
+        elif lang == "mr":
+            if is_colorless:
+                msg = "ही प्रतिमा एक कृष्णधवल रेखाचित्र किंवा स्केच वाटते, खरी वनस्पतीची पाने नाही."
+            else:
+                msg = "ही प्रतिमा पांढऱ्या पार्श्वभूमीचा दस्तऐवज किंवा आकृती वाटते, खरी वनस्पतीची पाने नाही."
+            recoms = [
+                "फोटो वनस्पतींच्या पानाचे प्रत्यक्ष छायाचित्र असल्याचे सुनिश्चित करा.",
+                "आकृती, फ्लोचार्ट किंवा मजकुराचे स्क्रीनशॉट अपलोड करणे टाळा.",
+                "वनस्पती बटाट्याचे पीक असल्याची खात्री करा."
+            ]
+
         return {
             "disease": "Invalid Image",
             "confidence": 0.0,
-            "message": "The image appears to be a black & white drawing or sketch, not a real plant leaf.",
-            "recommendations": [
-                "Ensure the photo is a real photograph (not a drawing or artwork).",
-                "Ensure the leaf is clearly visible.",
-                "Ensure the plant is a potato crop."
-            ]
+            "message": msg,
+            "recommendations": recoms
         }
+
+
+
     # ----------------------------------------------------------
 
     # 1. Define the cloud API Task
@@ -289,12 +353,29 @@ async def predict(
             )
             # 1. Get a working vision model dynamically
             model_engine = get_model("vision")
+            
+            # Configure safety settings to be more lenient for agricultural use
+            safety_settings = [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            ]
+            
             resp = await asyncio.to_thread(
                 model_engine.generate_content,
                 [prompt, gemini_image],
-                generation_config={"max_output_tokens": 10}
+                generation_config={"max_output_tokens": 10},
+                safety_settings=safety_settings
             )
+            
+            # If the response was blocked, we'll get a finish_reason that isn't 1 (SUCCESS)
+            if not resp.candidates or resp.candidates[0].finish_reason != 1:
+                print(f"Gemini response blocked or empty. Reason: {resp.candidates[0].finish_reason if resp.candidates else 'No candidates'}", flush=True)
+                return "POTATO" # Fallback
+                
             return resp.text.strip().upper()
+
         except Exception as e:
             # If Gemini is unavailable, skip validation and trust the local model
             print(f"Gemini API unavailable (skipping validation): {e}", flush=True)
@@ -320,15 +401,29 @@ async def predict(
     # Only reject if Gemini explicitly identified it as non-potato (not on API errors)
     if verdict != "POTATO" and not verdict.startswith("API_ERROR"):
         friendly_message = f"This appears to be: {verdict.title()}. Please upload a clear photo of a Potato leaf."
+        recoms = ["Ensure the photo is strictly of a single plant leaf.", "Ensure the plant is a potato crop."]
+        
         if "NOT A LEAF" in verdict:
             friendly_message = "This image does not appear to be a leaf. Please upload a clear photo of a Potato leaf."
             
+        if lang == "hi":
+            friendly_message = f"यह {verdict.title()} प्रतीत होता है। कृपया आलू की पत्ती का स्पष्ट फोटो अपलोड करें।"
+            if "NOT A LEAF" in verdict:
+                friendly_message = "यह छवि पत्ती जैसी नहीं लग रही है। कृपया आलू की पत्ती का स्पष्ट फोटो अपलोड करें।"
+            recoms = ["सुनिश्चित करें कि फोटो केवल एक पौधे की पत्ती का है।", "सुनिश्चित करें कि पौधा आलू की फसल है।"]
+        elif lang == "mr":
+            friendly_message = f"हे {verdict.title()} असल्याचे वाटते. कृपया बटाट्याच्या पानाचा स्पष्ट फोटो अपलोड करा."
+            if "NOT A LEAF" in verdict:
+                friendly_message = "ही प्रतिमा पान वाटत नाही. कृपया बटाट्याच्या पानाचा स्पष्ट फोटो अपलोड करा."
+            recoms = ["फोटो केवळ एका वनस्पतीच्या पानाचा असल्याची खात्री करा.", "वनस्पती बटाट्याचे पीक असल्याची खात्री करा."]
+
         return {
             "disease": "Invalid Image",
             "confidence": 0.0,
             "message": friendly_message,
-            "recommendations": ["Ensure the photo is strictly of a single plant leaf.", "Ensure the plant is a potato crop."]
+            "recommendations": recoms
         }
+
 
     # Use the local model prediction
     index = int(np.argmax(pred_vals))
@@ -348,3 +443,43 @@ async def predict(
         "message": translations[predicted_class].get(lang, translations[predicted_class]["en"]),
         "recommendations": recommendations[predicted_class].get(lang, recommendations[predicted_class]["en"])
     }
+
+@app.get("/translate_disease")
+def translate_disease(disease: str, lang: str = Query("en")):
+    if disease == "Invalid Image":
+        msg = "The image appears to be a black & white drawing or sketch, not a real plant leaf."
+        recoms = [
+            "Ensure the photo is a real photograph (not a drawing or artwork).",
+            "Ensure the leaf is clearly visible.",
+            "Ensure the plant is a potato crop."
+        ]
+        
+        if lang == "hi":
+            msg = "यह छवि एक श्वेत-श्याम रेखाचित्र या स्केच प्रतीत होती है, न कि असली पौधे की पत्ती।"
+            recoms = [
+                "सुनिश्चित करें कि फोटो एक वास्तविक तस्वीर है (चित्र या स्केच नहीं)।",
+                "सुनिश्चित करें कि पत्ती स्पष्ट रूप से दिखाई दे रही है।",
+                "सुनिश्चित करें कि पौधा आलू की फसल है।"
+            ]
+        elif lang == "mr":
+            msg = "ही प्रतिमा एक कृष्णधवल रेखाचित्र किंवा स्केच वाटते, खरी वनस्पतीची पाने नाही."
+            recoms = [
+                "फोटो प्रत्यक्ष छायाचित्र असल्याचे सुनिश्चित करा (रेखाचित्र किंवा कलाकृती नाही).",
+                "पाने स्पष्टपणे दिसत असल्याची खात्री करा.",
+                "वनस्पती बटाट्याचे पीक असल्याची खात्री करा."
+            ]
+            
+        return {
+            "message": msg,
+            "recommendations": recoms
+        }
+
+    
+    if disease not in translations:
+        return {"message": "Unknown disease", "recommendations": []}
+        
+    return {
+        "message": translations[disease].get(lang, translations[disease]["en"]),
+        "recommendations": recommendations[disease].get(lang, recommendations[disease]["en"])
+    }
+

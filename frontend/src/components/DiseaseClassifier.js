@@ -94,6 +94,25 @@ const DiseaseClassifier = ({ language }) => {
     };
   }, [stream]);
 
+  // Refetch translations when language changes or a new result arrives
+  useEffect(() => {
+    if (result && result.disease) {
+      // Fetch translation to ensure the result matches the current UI language
+      fetch(`/translate_disease?disease=${result.disease}&lang=${language}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.message && data.message !== result.message) {
+            setResult(prev => ({
+              ...prev,
+              message: data.message,
+              recommendations: data.recommendations
+            }));
+          }
+        })
+        .catch(err => console.error("Error fetching translation:", err));
+    }
+  }, [language, result?.disease, result?.message]);
+
   const isError = result && result.disease === "Invalid Image";
   const isHealthy = result && result.disease && result.disease.toLowerCase().includes('healthy');
 
