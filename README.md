@@ -1,11 +1,11 @@
 # 🌿 LeafGlimpse: AI Based Potato Plant Disease Detection System
 
-[![GitHub Repository](https://img.shields.io/badge/GitHub-Potato--Disease--AI-green?logo=github)](https://github.com/Aastha-9/Smart-Detection-of-Diseases-in-Potato-Leaves-Using-AI)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-LeafGlimpse--AI-green?logo=github)](https://github.com/Aastha-9/LeafGlimpse-AI-Based-Potato-Plant-Disease-Detection-System)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-blue?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://reactjs.org/)
 [![TensorFlow](https://img.shields.io/badge/AI-TensorFlow-FF6F00?logo=tensorflow)](https://www.tensorflow.org/)
 
-**This project** is a state-of-the-art, multilingual agricultural platform designed to empower farmers with instant disease diagnosis and AI-driven expert advice. Using deep learning and Large Language Models (LLM), it provides a complete toolkit for crop health management.
+**LeafGlimpse** is a state-of-the-art, multilingual agricultural platform designed to empower farmers with instant disease diagnosis and AI-driven expert advice. Using deep learning and Large Language Models (LLM), it provides a complete toolkit for crop health management.
 
 ---
 
@@ -51,8 +51,8 @@
 
 1.  **Clone the Repository**:
     ```bash
-    git clone https://github.com/Aastha-9/Smart-Detection-of-Diseases-in-Potato-Leaves-Using-AI.git
-    cd Smart-Detection-of-Diseases-in-Potato-Leaves-Using-AI
+    git clone https://github.com/Aastha-9/LeafGlimpse-AI-Based-Potato-Plant-Disease-Detection-System.git
+    cd LeafGlimpse-AI-Based-Potato-Plant-Disease-Detection-System
     ```
 
 2.  **Environment Variables**:
@@ -86,4 +86,4 @@ This project uses **Git LFS** to store model weights (housed in `/models`). Ensu
 
 ---
 
-🌿 **Potato Disease AI** — *Empowering Agriculture with Intelligent Diagnosis.*
+🌿 **LeafGlimpse** — *Empowering Agriculture with Intelligent Diagnosis.*
